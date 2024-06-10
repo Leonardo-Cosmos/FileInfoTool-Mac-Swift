@@ -1,0 +1,1 @@
+# FileInfoTool-Mac-Swift
