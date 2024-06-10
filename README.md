@@ -1,1 +1,1 @@
-# FileInfoTool-Mac-Swift
+# FileInfoTool for MacOS
