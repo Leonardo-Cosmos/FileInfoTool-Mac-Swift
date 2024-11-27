@@ -7,5 +7,9 @@
 
 import Foundation
 
-print("Hello, World!")
+do {
+    let launchOption = try ConsoleArgsParser.parseArgs(args: CommandLine.arguments)
+} catch ArgumentError.unknownMode(let mode) {
+    print("Unknown mode: \(mode)")
+}
 
