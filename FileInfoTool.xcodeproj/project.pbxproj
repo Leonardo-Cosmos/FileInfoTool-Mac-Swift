@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 55;
+	objectVersion = 70;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -30,6 +30,11 @@
 		A7D6797B2CF700130007DBA0 /* ConsoleArgsParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConsoleArgsParser.swift; sourceTree = "<group>"; };
 		A7D6797D2CF708E30007DBA0 /* InfoAttribute.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InfoAttribute.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		A773867E2D4A3DF900A07391 /* Managers */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Managers; sourceTree = "<group>"; };
+		A773867F2D4A3E0700A07391 /* Models */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Models; sourceTree = "<group>"; };
+/* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		A7AF83B82C1761BE009107BE /* Frameworks */ = {
@@ -61,7 +66,9 @@
 		A7AF83BD2C1761BE009107BE /* FileInfoTool */ = {
 			isa = PBXGroup;
 			children = (
+				A773867E2D4A3DF900A07391 /* Managers */,
 				A7D6797A2CF6FF590007DBA0 /* Info */,
+				A773867F2D4A3E0700A07391 /* Models */,
 				A7AF83BE2C1761BE009107BE /* main.swift */,
 			);
 			path = FileInfoTool;
@@ -90,6 +97,10 @@
 			buildRules = (
 			);
 			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				A773867E2D4A3DF900A07391 /* Managers */,
+				A773867F2D4A3E0700A07391 /* Models */,
 			);
 			name = FileInfoTool;
 			productName = FileInfoTool;

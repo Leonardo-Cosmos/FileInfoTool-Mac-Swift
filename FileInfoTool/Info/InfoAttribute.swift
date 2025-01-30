@@ -8,7 +8,7 @@
 import Foundation
 
 /// The value indicating an attribute of file or directory.
-enum InfoAttribute {
+enum InfoAttribute: CaseIterable {
     /// Date created
     case CreationTime
     
