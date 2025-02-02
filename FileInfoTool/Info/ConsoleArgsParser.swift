@@ -47,8 +47,8 @@ struct LaunchOption {
     let dirPath: String
     let inputFile: String?
     let outputFile: String?
-    let fileAttributeNames: [InfoAttribute]?
-    let dirAttributeNames: [InfoAttribute]?
+    let fileAttributes: [InfoAttribute]?
+    let dirAttributes: [InfoAttribute]?
     let recursive: Bool
     let baseFile: String?
     let relativePath: String?
@@ -56,15 +56,8 @@ struct LaunchOption {
     let overwrite: Bool
 }
 
-enum ArgumentError: Error {
-    case missingMode
-    case unknownMode(String)
-    case onRootDir
-    case unknownAttribute(String)
-    case unknownArguments(String)
-}
-
 internal class ConsoleArgsParser {
+    
     private static let dirPathKeys: [String] = ["-d", "-dir" ]
     
     private static let inputFilePathKeys: [String] = [ "-i", "-input" ]
@@ -123,28 +116,29 @@ internal class ConsoleArgsParser {
         let dirPath: String? = takeArgValue(argDict: &argDict, argKeys: dirPathKeys)
         // Make sure the directory path is absolute.
         // Use working directory by default.
-        let dirUrl = fileURL(dirPath: (dirPath ?? "."))
+        let dirUrl = createURL(dirPath: (dirPath ?? "."))
         
-        if dirUrl.absoluteString == "/" {
+        if dirUrl.purePath == "/" {
             throw ArgumentError.onRootDir
         }
         
         func defaultInfoFilePath() -> URL {
             let defaultFileName = String(format: InfoRecord.defaultFileNameFormat, dirUrl.lastPathComponent)
-            return URL(fileURLWithPath: defaultFileName, isDirectory: true, relativeTo: dirUrl.deletingLastPathComponent())
+            
+            return dirUrl.deletingLastPathComponent().appending(fileNotDirPath: defaultFileName)
         }
         
         var inputFilePath = takeArgValue(argDict: &argDict, argKeys: inputFilePathKeys)
         if mode.requiresInputFile && inputFilePath == nil {
-            inputFilePath = defaultInfoFilePath().absoluteString
+            inputFilePath = defaultInfoFilePath().purePath
         }
         
         var outputFilePath = takeArgValue(argDict: &argDict, argKeys: outputFilePathKeys)
         if mode.requiresOutputFile && outputFilePath == nil {
-            outputFilePath = defaultInfoFilePath().absoluteString
+            outputFilePath = defaultInfoFilePath().purePath
         }
         
-        var recursive = takeArgValue(argDict: &argDict, argKeys: recursiveKeys) != nil
+        let recursive = takeArgValue(argDict: &argDict, argKeys: recursiveKeys) != nil
         
         let attributeValue = takeArgValue(argDict: &argDict, argKeys: attributeKeys)
         var fileAttributeValue = takeArgValue(argDict: &argDict, argKeys: fileAttributeKeys)
@@ -182,11 +176,11 @@ internal class ConsoleArgsParser {
         }
         
         return LaunchOption(mode: mode,
-                            dirPath: dirUrl.absoluteString,
+                            dirPath: dirUrl.purePath,
                             inputFile: inputFilePath,
                             outputFile: outputFilePath,
-                            fileAttributeNames: fileAttributes,
-                            dirAttributeNames: dirAttributes,
+                            fileAttributes: fileAttributes,
+                            dirAttributes: dirAttributes,
                             recursive: recursive,
                             baseFile: baseFilePath,
                             relativePath: relativePath,
@@ -231,12 +225,16 @@ internal class ConsoleArgsParser {
         return argValue
     }
     
-    private static func fileURL(dirPath: String) -> URL {
-        if dirPath.starts(with: "/") {
-            return URL(fileURLWithPath: dirPath, isDirectory: true)
+    private static func createURL(dirPath: String) -> URL {
+        if dirPath == "." {
+            return URL(dirPath: FileManager.default.currentDirectoryPath)
+        } else if dirPath.starts(with: "/") {
+            // Create URL by absolute path.
+            return URL(dirPath: dirPath)
         } else {
-            let currentDirUrl = URL(fileURLWithPath: FileManager.default.currentDirectoryPath, isDirectory: true)
-            return URL(fileURLWithPath: dirPath, isDirectory: true, relativeTo: currentDirUrl)
+            // Create URL by relative path.
+            let currentDirUrl = URL(dirPath: FileManager.default.currentDirectoryPath)
+            return currentDirUrl.appending(dirPath: dirPath)
         }
     }
     

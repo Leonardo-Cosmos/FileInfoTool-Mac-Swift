@@ -54,7 +54,7 @@ let validDirProperties = [
 ]
 
 internal extension InfoAttribute {
-    func nameString() -> String {
+    var nameString: String {
         switch self {
         case .CreationTime:
             return "Date created"
