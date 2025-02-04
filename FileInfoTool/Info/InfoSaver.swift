@@ -120,7 +120,34 @@ internal class InfoSaver {
         
         let dirInfoRecord = try saveInfoRecord(url:dirUrl) as! DirectoryInfoRecord
         
-        var fileInfoRecord: [RegularFileInfoRecord] = []
+        var fileUrls: [URL]
+        do {
+            fileUrls = try FileManager.default.contentsOfDirectory(at: dirUrl, includingPropertiesForKeys: nil)
+        } catch let error as NSError {
+            print(error.localizedDescription)
+            dirInfoRecord.getFilesFailed = true;
+            fileUrls = []
+        }
+        
+        let regularFileUrls = fileUrls.filter { url in !url.hasDirectoryPath }
+        var regularFileInfoRecords: [RegularFileInfoRecord] = []
+        for regularFileUrl in regularFileUrls {
+            let regularFileInfoRecord = try saveInfoRecord(url: regularFileUrl) as! RegularFileInfoRecord
+            regularFileInfoRecords.append(regularFileInfoRecord)
+        }
+        regularFileInfoRecords.sort(by: RegularFileInfoRecord.compareByName(lInfo:rInfo:))
+        dirInfoRecord.files = regularFileInfoRecords
+        
+        if recursive {
+            let subDirUrls = fileUrls.filter { url in url.hasDirectoryPath }
+            var subDirInfoRecords: [DirectoryInfoRecord] = []
+            for subDirUrl in subDirUrls {
+                let subDirInfoRecord = try save(dirUrl: subDirUrl, recursive: recursive)
+                subDirInfoRecords.append(subDirInfoRecord)
+            }
+            subDirInfoRecords.sort(by: DirectoryInfoRecord.compareByName(lInfo:rInfo:))
+            dirInfoRecord.directories = subDirInfoRecords
+        }
         
         return dirInfoRecord
     }

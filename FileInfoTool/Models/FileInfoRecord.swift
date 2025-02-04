@@ -51,4 +51,8 @@ internal extension FileInfoRecord {
         }
         return path.string
     }
+    
+    static func compareByName(lInfo: any FileInfoRecord, rInfo: any FileInfoRecord) -> Bool {
+        return lInfo.name > rInfo.name
+    }
 }

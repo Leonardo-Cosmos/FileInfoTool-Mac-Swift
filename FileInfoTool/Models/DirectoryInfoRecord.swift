@@ -31,8 +31,6 @@ internal class DirectoryInfoRecord: FileInfoRecord, Codable {
     
     var getFilesFailed: Bool = false
     
-    var getDirectoriesFailed: Bool = false
-    
     init(name: String, directory: DirectoryInfoRecord? = nil,
          creationTimeUtc: String? = nil, creationTimeUtcInterval: Double? = nil,
          lastWriteTimeUtc: String? = nil, lastWriteTimeUtcInterval: Double? = nil,
