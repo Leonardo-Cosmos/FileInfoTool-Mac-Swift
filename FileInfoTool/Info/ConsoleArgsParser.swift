@@ -80,11 +80,11 @@ internal class ConsoleArgsParser {
     
     private static let overwriteKeys: [String] = [ "-ow", "-over-write" ]
     
-    private static let creationTimeAttributeValue: String = "c";
+    private static let creationDateAttributeValue: String = "c";
     
-    private static let lastWriteTimeAttributeValue: String = "m";
+    private static let modificationDateAttributeValue: String = "m";
     
-    private static let lastAccessAttributeValue: String = "a";
+    private static let accessDateAttributeValue: String = "a";
     
     private static let sizeAttributeValue: String = "s";
     
@@ -247,12 +247,12 @@ internal class ConsoleArgsParser {
         for attributeChar in attributeValue {
             let nameValue = attributeChar.lowercased()
             switch nameValue {
-            case creationTimeAttributeValue:
-                attributeNames.append(.CreationTime)
-            case lastWriteTimeAttributeValue:
-                attributeNames.append(.LastWriteTime)
-            case lastAccessAttributeValue:
-                attributeNames.append(.LastAccessTime)
+            case creationDateAttributeValue:
+                attributeNames.append(.CreationDate)
+            case modificationDateAttributeValue:
+                attributeNames.append(.ModificationDate)
+            case accessDateAttributeValue:
+                attributeNames.append(.AccessDate)
             case sizeAttributeValue:
                 attributeNames.append(.Size)
             case hashAttributeValue:

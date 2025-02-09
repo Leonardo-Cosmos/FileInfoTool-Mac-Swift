@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		A72C6EA42D51D86800D3B750 /* InfoLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = A72C6EA32D51D86800D3B750 /* InfoLoader.swift */; };
 		A773868F2D4BD7A100A07391 /* InfoSerializer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A773868E2D4BD7A100A07391 /* InfoSerializer.swift */; };
 		A7A1D9592D4CC30100EB67F2 /* InfoLauncher.swift in Sources */ = {isa = PBXBuildFile; fileRef = A7A1D9582D4CC30100EB67F2 /* InfoLauncher.swift */; };
 		A7A1D95B2D4CC4EC00EB67F2 /* InfoSaver.swift in Sources */ = {isa = PBXBuildFile; fileRef = A7A1D95A2D4CC4EC00EB67F2 /* InfoSaver.swift */; };
@@ -29,6 +30,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		A72C6EA32D51D86800D3B750 /* InfoLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InfoLoader.swift; sourceTree = "<group>"; };
 		A773868E2D4BD7A100A07391 /* InfoSerializer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InfoSerializer.swift; sourceTree = "<group>"; };
 		A7A1D9582D4CC30100EB67F2 /* InfoLauncher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InfoLauncher.swift; sourceTree = "<group>"; };
 		A7A1D95A2D4CC4EC00EB67F2 /* InfoSaver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InfoSaver.swift; sourceTree = "<group>"; };
@@ -91,6 +93,7 @@
 				A7A1D95C2D4CFD0300EB67F2 /* Errors.swift */,
 				A7D6797D2CF708E30007DBA0 /* InfoAttribute.swift */,
 				A7A1D9582D4CC30100EB67F2 /* InfoLauncher.swift */,
+				A72C6EA32D51D86800D3B750 /* InfoLoader.swift */,
 				A7A1D95A2D4CC4EC00EB67F2 /* InfoSaver.swift */,
 				A773868E2D4BD7A100A07391 /* InfoSerializer.swift */,
 			);
@@ -165,6 +168,7 @@
 				A7A1D9592D4CC30100EB67F2 /* InfoLauncher.swift in Sources */,
 				A7A1D95B2D4CC4EC00EB67F2 /* InfoSaver.swift in Sources */,
 				A7A1D95D2D4CFD0300EB67F2 /* Errors.swift in Sources */,
+				A72C6EA42D51D86800D3B750 /* InfoLoader.swift in Sources */,
 				A7AF83BF2C1761BE009107BE /* main.swift in Sources */,
 				A7D6797C2CF700130007DBA0 /* ConsoleArgsParser.swift in Sources */,
 			);

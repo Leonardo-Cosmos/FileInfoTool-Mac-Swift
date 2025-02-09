@@ -20,7 +20,7 @@ internal class InfoSerializer {
         print()
     }
     
-    static func deserialize(infoFilePath: String) throws -> InfoRecord? {
+    static func deserialize(infoFilePath: String) throws -> InfoRecord {
         let decoder = JSONDecoder()
         let json = try Data(contentsOf: URL(fileURLWithPath: infoFilePath, isDirectory: false))
         print()

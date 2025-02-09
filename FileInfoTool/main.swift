@@ -26,5 +26,9 @@ if let launchOption = launchOption {
         print("Directory doesn't exist, path: \(dirPath)")
     } catch RuntimeError.infoFileExists(let infoFilePath) {
         print("Info file exists already, path: \(infoFilePath)")
+    } catch RuntimeError.infoFileNotExists(let infoFilePath) {
+        print("Info file doesn't exist, path: \(infoFilePath)")
+    } catch RuntimeError.invalidInfoFile(let infoFilePath) {
+        print("Invalid info file, path: \(infoFilePath)")
     }
 }

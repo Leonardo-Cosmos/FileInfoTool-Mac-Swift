@@ -18,4 +18,6 @@ enum ArgumentError: Error {
 enum RuntimeError: Error {
     case targetDirNotExists(String)
     case infoFileExists(String)
+    case infoFileNotExists(String)
+    case invalidInfoFile(String)
 }

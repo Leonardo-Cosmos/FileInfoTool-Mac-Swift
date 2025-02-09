@@ -10,13 +10,13 @@ import Foundation
 /// The value indicating an attribute of file or directory.
 enum InfoAttribute: CaseIterable {
     /// Date created
-    case CreationTime
+    case CreationDate
     
     /// Date modified
-    case LastWriteTime
+    case ModificationDate
     
     /// Date accessed
-    case LastAccessTime
+    case AccessDate
     
     /// File size
     case Size
@@ -25,42 +25,34 @@ enum InfoAttribute: CaseIterable {
     case Hash
 }
 
-let validaSaveFileAttributes = [
-    InfoAttribute.CreationTime,
-    InfoAttribute.LastWriteTime,
-    InfoAttribute.LastAccessTime,
-    InfoAttribute.Size,
-    InfoAttribute.Hash,
-]
-
-let validValidateFileAttributes = [
-    InfoAttribute.CreationTime,
-    InfoAttribute.LastWriteTime,
-    InfoAttribute.LastAccessTime,
+let validFileAttributes = [
+    InfoAttribute.CreationDate,
+    InfoAttribute.ModificationDate,
+    InfoAttribute.AccessDate,
     InfoAttribute.Size,
     InfoAttribute.Hash,
 ]
 
 let validRestoreFileAttributes = [
-    InfoAttribute.CreationTime,
-    InfoAttribute.LastWriteTime,
-    InfoAttribute.LastAccessTime,
+    InfoAttribute.CreationDate,
+    InfoAttribute.ModificationDate,
+    InfoAttribute.AccessDate,
 ]
 
 let validDirProperties = [
-    InfoAttribute.CreationTime,
-    InfoAttribute.LastWriteTime,
-    InfoAttribute.LastAccessTime,
+    InfoAttribute.CreationDate,
+    InfoAttribute.ModificationDate,
+    InfoAttribute.AccessDate,
 ]
 
 internal extension InfoAttribute {
     var nameString: String {
         switch self {
-        case .CreationTime:
+        case .CreationDate:
             return "Date created"
-        case .LastWriteTime:
+        case .ModificationDate:
             return "Date modified"
-        case .LastAccessTime:
+        case .AccessDate:
             return "Date accessed"
         case .Size:
             return "Size"

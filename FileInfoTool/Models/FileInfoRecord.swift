@@ -14,17 +14,17 @@ internal protocol FileInfoRecord {
     
     var directory: DirectoryInfoRecord? { get set }
     
-    var creationTimeUtc: String? { get set }
+    var creationDateUtc: String? { get set }
     
-    var creationTimeUtcInterval: Double? { get set }
+    var creationDateUtcInterval: Double? { get set }
     
-    var lastWriteTimeUtc: String? { get set }
+    var modificationDateUtc: String? { get set }
     
-    var lastWriteTimeUtcInterval: Double? { get set }
+    var modificationDateUtcInterval: Double? { get set }
     
-    var lastAccessTimeUtc: String? { get set }
+    var accessDateUtc: String? { get set }
     
-    var lastAccessTimeUtcInterval: Double? { get set }
+    var accessDateUtcInterval: Double? { get set }
 }
 
 internal extension FileInfoRecord {
