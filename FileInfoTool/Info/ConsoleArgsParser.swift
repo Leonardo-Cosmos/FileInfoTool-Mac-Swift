@@ -90,7 +90,7 @@ internal class ConsoleArgsParser {
     
     private static let hashAttributeValue: String = "h";
     
-    private static let wildcardAttributeValue: String = "*";
+    private static let wildcardAttributeValue: String = "x";
     
     static func parseArgs(args: [String]) throws -> LaunchOption {
         guard args.count > 0 && !args[0].starts(with: "-") else {

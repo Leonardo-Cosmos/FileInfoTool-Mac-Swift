@@ -14,7 +14,7 @@ internal class InfoLauncher {
         case .Save:
             try save(option: option)
         case .Restore, .Validate, .List:
-            load(option: option)
+            try load(option: option)
         case .ExtractSub:
             extractSubDirectory(option: option)
         case .AddSub:
@@ -32,8 +32,13 @@ internal class InfoLauncher {
         .save(recursive: option.recursive, overwrite: option.overwrite)
     }
     
-    private static func load(option: LaunchOption) {
-        
+    private static func load(option: LaunchOption) throws {
+        try InfoLoader(dirPath: option.dirPath,
+                       infoFilePath: option.inputFile!,
+                       mode: option.mode,
+                       fileAttributes: option.fileAttributes,
+                       dirAttributes: option.dirAttributes)
+        .load(recursive: option.recursive)
     }
     
     private static func extractSubDirectory(option: LaunchOption) {

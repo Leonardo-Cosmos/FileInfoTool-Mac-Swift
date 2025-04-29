@@ -9,6 +9,7 @@ import Foundation
 
 var launchOption: LaunchOption? = nil
 do {
+    print(CommandLine.arguments)
     let args = Array(CommandLine.arguments.dropFirst(1))
     launchOption = try ConsoleArgsParser.parseArgs(args: args)
 } catch ArgumentError.missingMode {
@@ -17,6 +18,10 @@ do {
     print("Unknown mode: \(mode)")
 } catch ArgumentError.onRootDir {
     print("Cannot execute against a root path")
+} catch ArgumentError.unknownAttribute(let attribute) {
+    print("Unknown attribute argument: \(attribute)")
+} catch ArgumentError.unknownArguments(let arguments) {
+    print("Unkonwn arguments: \(arguments)")
 }
 
 if let launchOption = launchOption {
