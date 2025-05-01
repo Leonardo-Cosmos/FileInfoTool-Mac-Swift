@@ -168,7 +168,7 @@ internal class InfoLoader {
             unknownFileCount = 0
             unknownDirectoryCount = 0
             let dirUrl = URL(dirPath: dirPath)
-            load(dirUrl: dirUrl, dirInfoRecord: infoRecord.directory,
+            try load(dirUrl: dirUrl, dirInfoRecord: infoRecord.directory,
                  recursive: recursive, restore: mode == .Restore)
             print("""
             Checked
@@ -210,6 +210,237 @@ internal class InfoLoader {
         }
         
         printLoadedInfoRecord(infoRecord: dirInfoRecord)
+    }
+    
+    private func load(dirUrl: URL, dirInfoRecord: DirectoryInfoRecord,
+                      recursive: Bool, restore: Bool) throws {
+        var fileUrls: [URL]
+        do {
+            fileUrls = try FileManager.default.contentsOfDirectory(at: dirUrl, includingPropertiesForKeys: nil)
+        } catch let error as NSError {
+            print(error.localizedDescription)
+            dirInfoRecord.getFilesFailed = true
+            fileUrls = []
+        }
+        if recursive {
+            let subDirInfoRecords = dirInfoRecord.directories ?? []
+            var loadedSubDirInfoRecords: [DirectoryInfoRecord] = []
+            let subDirectoryUrls = fileUrls.filter { url in url.hasDirectoryPath }
+            for subDirectoryUrl in subDirectoryUrls {
+                let subDirInfoRecord = subDirInfoRecords.first { infoRecord in infoRecord.name == subDirectoryUrl.lastPathComponent }
+                if let subDirInfoRecord = subDirInfoRecord {
+                    try load(dirUrl: subDirectoryUrl, dirInfoRecord: subDirInfoRecord, recursive: recursive, restore: restore)
+                    loadedSubDirInfoRecords.append(subDirInfoRecord)
+                } else {
+                    printUnknownInfo(url: subDirectoryUrl)
+                    let (subDirUnknownFileCount, subDirUnknownDirectoryCount) = countDirectoryContent(dirUrl: subDirectoryUrl)
+                    unknownFileCount = unknownFileCount + subDirUnknownFileCount
+                    unknownDirectoryCount = unknownDirectoryCount + subDirUnknownDirectoryCount
+                }
+            }
+            
+            let loadedSubDirNameSet = Set(loadedSubDirInfoRecords.map { infoRecord in infoRecord.name })
+            let missingSubDirInfoRecords = subDirInfoRecords.filter { infoRecord in !loadedSubDirNameSet.contains(infoRecord.name) }
+            printMissingInfoRecords(dirUrl: dirUrl, infoRecords: missingSubDirInfoRecords)
+            for missingSubDirInfoRecord in missingSubDirInfoRecords {
+                let (subDirMissingFileCount, subDirMissingDirectoryCount) = countDirectoryRecordContent(dirInfoRecord: missingSubDirInfoRecord)
+                missingFileCount = missingFileCount + subDirMissingFileCount
+                missingDirectoryCount = missingDirectoryCount + subDirMissingDirectoryCount
+            }
+        }
+        
+        let regularFileInfoRecords = dirInfoRecord.files ?? []
+        var loadedRegularFileInfoRecords: [RegularFileInfoRecord] = []
+        let regularFileUrls = fileUrls.filter { url in !url.hasDirectoryPath }
+        for regularFileUrl in regularFileUrls {
+            let regularFileInfoRecord = regularFileInfoRecords.first { infoRecord in infoRecord.name == regularFileUrl.lastPathComponent }
+            if let regularFileInfoRecord = regularFileInfoRecord {
+                try loadInfoRecord(url: regularFileUrl, infoRecord: regularFileInfoRecord, restore: restore)
+                loadedRegularFileInfoRecords.append(regularFileInfoRecord)
+            } else {
+                printUnknownInfo(url: regularFileUrl)
+            }
+        }
+        
+        let loadedRegularFileNameSet = Set(loadedRegularFileInfoRecords.map { infoRecord in infoRecord.name })
+        let missingRegularFileInfoRecords = regularFileInfoRecords.filter { infoRecord in !loadedRegularFileNameSet.contains(infoRecord.name) }
+        printMissingInfoRecords(dirUrl: dirUrl, infoRecords: missingRegularFileInfoRecords)
+        
+        try loadInfoRecord(url: dirUrl, infoRecord: dirInfoRecord, restore: restore)
+    }
+    
+    private func printUnknownInfo(url: URL) {
+        if url.hasDirectoryPath {
+            print("Unknown directory \(url.relativePath(baseUrl: URL(dirPath: dirPath)))")
+            unknownDirectoryCount += 1
+        } else {
+            print("Unknown file \(url.relativePath(baseUrl: URL(dirPath: dirPath)))")
+            unknownFileCount += 1
+        }
+    }
+    
+    private func printMissingInfoRecords(dirUrl: URL, infoRecords: [FileInfoRecord]) {
+        
+        for infoRecord in infoRecords {
+            if infoRecord is RegularFileInfoRecord {
+                let fileUrl = dirUrl.appending(fileNotDirPath: infoRecord.name)
+                print("Missing file \(fileUrl.relativePath(baseUrl: URL(dirPath: dirPath)))")
+                missingFileCount += 1
+            } else if infoRecord is DirectoryInfoRecord {
+                let subDirUrl = dirUrl.appending(dirPath: infoRecord.name)
+                print("Missing directory: \(subDirUrl.relativePath(baseUrl: URL(dirPath: dirPath)))")
+                missingDirectoryCount += 1
+            }
+        }
+    }
+    
+    private func countDirectoryContent(dirUrl: URL) -> (Int, Int) {
+        var regularFileCount = 0
+        var directoryCount = 0
+        
+        var fileUrls: [URL]
+        do {
+            fileUrls = try FileManager.default.contentsOfDirectory(at: dirUrl, includingPropertiesForKeys: nil)
+        } catch let error as NSError {
+            print(error.localizedDescription)
+            fileUrls = []
+        }
+        
+        let subDirUrls = fileUrls.filter { url in url.hasDirectoryPath }
+        for subDirUrl in subDirUrls {
+            let (subDirRegularFileCount, subDirDirectoryCount) = countDirectoryContent(dirUrl: subDirUrl)
+            regularFileCount = regularFileCount + subDirRegularFileCount
+            directoryCount = directoryCount + subDirDirectoryCount
+        }
+        directoryCount = directoryCount + subDirUrls.count
+        
+        let regularFileUrls = fileUrls.filter { url in !url.hasDirectoryPath }
+        regularFileCount = regularFileCount + regularFileUrls.count
+        
+        return (regularFileCount, directoryCount)
+    }
+    
+    private func countDirectoryRecordContent(dirInfoRecord: DirectoryInfoRecord) -> (Int, Int) {
+        
+        var regularFileCount = 0
+        var directoryCount = 0
+        
+        let subDirInfoRecords = dirInfoRecord.directories ?? []
+        for subDirInfoRecord in subDirInfoRecords {
+            let (subDirRegularFileCount, subDirDirectoryCount) = countDirectoryRecordContent(dirInfoRecord: subDirInfoRecord)
+            regularFileCount = regularFileCount + subDirRegularFileCount
+            directoryCount = directoryCount + subDirDirectoryCount
+        }
+        directoryCount = directoryCount + subDirInfoRecords.count
+        
+        let regularFileInfoRecords = dirInfoRecord.files ?? []
+        regularFileCount = regularFileCount + regularFileInfoRecords.count
+        
+        return (regularFileCount, directoryCount)
+    }
+    
+    private func loadInfoRecord(url: URL, infoRecord: FileInfoRecord, restore: Bool) throws {
+        var restoreUrl: URL
+        var loadCreationDate = false
+        var loadModificationDate = false
+        var loadAccessDate = false
+        var loadSize = false
+        var loadHash = false
+        if url.hasDirectoryPath {
+            restoreUrl = URL(dirPath: url.standardPath)
+            
+            loadCreationDate = loadDirCreationDate
+            loadModificationDate = loadDirModificationDate
+            loadAccessDate = loadDirAccessDate
+            
+            checkedDirectoryCount = checkedDirectoryCount + 1
+            
+        } else {
+            restoreUrl = URL(fileNotDirPath: url.standardPath)
+            
+            loadCreationDate = loadFileCreationDate
+            loadModificationDate = loadFileModificationDate
+            loadAccessDate = loadFileAccessDate
+            loadSize = loadFileSize
+            loadHash = loadFileHash
+            
+            checkedFileCount = checkedFileCount + 1
+        }
+        
+        var resourceKeys: Set<URLResourceKey> = []
+        if loadCreationDate {
+            resourceKeys.insert(.creationDateKey)
+        }
+        if loadModificationDate {
+            resourceKeys.insert(.contentModificationDateKey)
+        }
+        if loadAccessDate {
+            resourceKeys.insert(.contentAccessDateKey)
+        }
+        if loadSize {
+            resourceKeys.insert(.fileSizeKey)
+        }
+        
+        let resourceValues = try url.resourceValues(forKeys: resourceKeys)
+        var restoreResourceValues = URLResourceValues()
+        let dateFormatter = ISO8601DateFormatter()
+        
+        var changedCreationDateUtc: String? = nil
+        let isCreationDateChanged = loadCreationDate && Self.isDateChanged(date: resourceValues.creationDate, isoString: infoRecord.creationDateUtc)
+        if isCreationDateChanged {
+            changedCreationDateUtc = dateFormatter.string(from: resourceValues.creationDate!)
+            if restore {
+                restoreResourceValues.creationDate = dateFormatter.date(from: infoRecord.creationDateUtc!)
+            }
+        }
+        
+        var changedModificationDateUtc: String? = nil
+        let isModificationDateChanged = loadModificationDate && Self.isDateChanged(date: resourceValues.contentModificationDate, isoString: infoRecord.modificationDateUtc)
+        if isModificationDateChanged {
+            changedModificationDateUtc = dateFormatter.string(from: resourceValues.contentModificationDate!)
+            if restore {
+                restoreResourceValues.contentModificationDate = dateFormatter.date(from: infoRecord.modificationDateUtc!)
+            }
+        }
+        
+        var changedAccessDateUtc: String? = nil
+        let isAccessDateChanged = loadAccessDate && Self.isDateChanged(date: resourceValues.contentAccessDate, isoString: infoRecord.accessDateUtc)
+        if isAccessDateChanged {
+            changedAccessDateUtc = dateFormatter.string(from: resourceValues.contentAccessDate!)
+            if restore {
+                restoreResourceValues.contentAccessDate = dateFormatter.date(from: infoRecord.accessDateUtc!)
+            }
+        }
+        
+        var changedFileSize: Int? = nil
+        var isFileSizeChanged = false
+        if !restore && loadSize {
+            let regularFileInfoRecord = infoRecord as! RegularFileInfoRecord
+            if let recordSize = regularFileInfoRecord.size, let actualSize = resourceValues.fileSize {
+                if recordSize != actualSize {
+                    isFileSizeChanged = true
+                    changedFileSize = actualSize
+                }
+            }
+        }
+        
+        var changedFileSHA512: String? = nil
+        var isFileHashChanged = false
+        
+        try restoreUrl.setResourceValues(resourceValues)
+        
+        let isChanged = isCreationDateChanged || isModificationDateChanged || isAccessDateChanged
+        || isFileSizeChanged || isFileHashChanged
+        
+        printLoadedInfoRecord(url: url, infoRecord: infoRecord, restore: restore, isChanged: isChanged, changedCreationDateUtc: changedCreationDateUtc, changedModificationDateUtc: changedModificationDateUtc, changedAccessDateUtc: changedAccessDateUtc, changedFileSize: changedFileSize, changedFileSHA512: changedFileSHA512)
+    }
+    
+    private static func isDateChanged(date: Date?, isoString: String?) -> Bool {
+        if let date = date, let isoString = isoString {
+            return date.ISO8601Format() != isoString
+        } else {
+            return false
+        }
     }
     
     private func printLoadedInfoRecord(infoRecord: FileInfoRecord) {
@@ -259,44 +490,6 @@ internal class InfoLoader {
                 print(" SHA512: \(fileInfoRecord.sha512 ?? "")")
             }
         }
-    }
-    
-    private func load(dirUrl: URL, dirInfoRecord: DirectoryInfoRecord,
-                      recursive: Bool, restore: Bool) {
-        
-    }
-    
-    private func printUnknownInfo(url: URL) {
-        if url.hasDirectoryPath {
-            print("Unknown directory \(url.relativePath(baseUrl: URL(dirPath: dirPath)))")
-            unknownDirectoryCount += 1
-        } else {
-            print("Unknown file \(url.relativePath(baseUrl: URL(dirPath: dirPath)))")
-            unknownFileCount += 1
-        }
-    }
-    
-    private func printMissingInfoRecords(dirUrl: URL, infoRecords: [FileInfoRecord]) {
-        
-        for infoRecord in infoRecords {
-            if infoRecord is RegularFileInfoRecord {
-                let fileUrl = dirUrl.appending(fileNotDirPath: infoRecord.name)
-                print("Missing file \(fileUrl.relativePath(baseUrl: URL(dirPath: dirPath)))")
-                missingFileCount += 1
-            } else if infoRecord is DirectoryInfoRecord {
-                let subDirUrl = dirUrl.appending(dirPath: infoRecord.name)
-                print("Missing directory: \(subDirUrl.relativePath(baseUrl: URL(dirPath: dirPath)))")
-                missingDirectoryCount += 1
-            }
-        }
-    }
-    
-    private func countDirectoryContent(dirUrl: URL) -> (Int, Int) {
-        return (0, 0)
-    }
-    
-    private func countDirectoryRecordContent(dirInfoRecord: DirectoryInfoRecord) -> (Int, Int) {
-        return (0, 0)
     }
     
     

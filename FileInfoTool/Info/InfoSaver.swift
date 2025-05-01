@@ -155,7 +155,6 @@ internal class InfoSaver {
     }
     
     private func saveInfoRecord(url: URL) throws -> FileInfoRecord {
-        
         var saveCreationDate = false;
         var saveModificationDate = false;
         var saveAccessDate = false;
@@ -203,12 +202,15 @@ internal class InfoSaver {
         
         if saveCreationDate {
             infoRecord.creationDateUtc = resourceValues.creationDate?.ISO8601Format()
+            infoRecord.creationDateUtcInterval = resourceValues.creationDate?.timeIntervalSinceReferenceDate
         }
         if saveModificationDate {
             infoRecord.modificationDateUtc = resourceValues.contentModificationDate?.ISO8601Format()
+            infoRecord.modificationDateUtcInterval = resourceValues.contentModificationDate?.timeIntervalSinceReferenceDate
         }
         if saveAccessDate {
             infoRecord.accessDateUtc = resourceValues.contentAccessDate?.ISO8601Format()
+            infoRecord.accessDateUtcInterval = resourceValues.contentAccessDate?.timeIntervalSinceReferenceDate
         }
         if saveSize {
             let fileInfoRecord = infoRecord as! RegularFileInfoRecord
@@ -220,7 +222,6 @@ internal class InfoSaver {
     }
     
     private func printSavedInfoRecord(url: URL, infoRecord: FileInfoRecord) {
-        
         print("Saved", terminator: "")
         if infoRecord is RegularFileInfoRecord {
             print(" regular file", terminator: "")
