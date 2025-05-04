@@ -116,7 +116,7 @@ internal class ConsoleArgsParser {
         let dirPath: String? = takeArgValue(argDict: &argDict, argKeys: dirPathKeys)
         // Make sure the directory path is absolute.
         // Use working directory by default.
-        let dirUrl = createURL(dirPath: (dirPath ?? "."))
+        let dirUrl = createDirURL(dirPath: (dirPath ?? "."))
         
         if dirUrl.purePath == "/" {
             throw ArgumentError.onRootDir
@@ -225,7 +225,7 @@ internal class ConsoleArgsParser {
         return argValue
     }
     
-    private static func createURL(dirPath: String) -> URL {
+    private static func createDirURL(dirPath: String) -> URL {
         if dirPath == "." {
             return URL(dirPath: FileManager.default.currentDirectoryPath)
         } else if dirPath.starts(with: "/") {

@@ -170,6 +170,8 @@ internal class InfoLoader {
             let dirUrl = URL(dirPath: dirPath)
             try load(dirUrl: dirUrl, dirInfoRecord: infoRecord.directory,
                  recursive: recursive, restore: mode == .Restore)
+            
+            print()
             print("""
             Checked
                 file: \(checkedFileCount)
@@ -426,6 +428,18 @@ internal class InfoLoader {
         
         var changedFileSHA512: String? = nil
         var isFileHashChanged = false
+        if !restore && loadHash {
+            let fileInfoRecord = infoRecord as! RegularFileInfoRecord
+            
+            if let loadedSHA512 = fileInfoRecord.sha512 {
+                let sha512 = calculateFileHash(fileUrl: url, regularFileInfoRecord: fileInfoRecord)
+                
+                if loadedSHA512 != sha512 {
+                    isFileHashChanged = true
+                    changedFileSHA512 = sha512
+                }
+            }
+        }
         
         try restoreUrl.setResourceValues(resourceValues)
         
@@ -441,6 +455,29 @@ internal class InfoLoader {
         } else {
             return false
         }
+    }
+    
+    private func calculateFileHash(fileUrl: URL, regularFileInfoRecord: RegularFileInfoRecord) -> String {
+        print("Hash \(fileUrl.relativePath(baseUrl: URL(dirPath: dirPath)))")
+        let progressPrinter = ProgressPrinter(format: "%@ (%@ / %@), %@/s")
+        var sha512 = ""
+        do {
+            sha512 = try HashComputer.computeSHA512(fileUrl: fileUrl) { hashProgress in
+                progressPrinter.update(hashProgress.percentage,
+                                       hashProgress.totalUpdatedLength.byteWithUnitString(),
+                                       hashProgress.totalLength.byteWithUnitString(),
+                                       hashProgress.lengthPerSecond)
+            }
+        } catch let error as NSError {
+            print(error.localizedDescription)
+            regularFileInfoRecord.computeHashFailed = true
+        }
+        
+        defer {
+            progressPrinter.end()
+        }
+        
+        return sha512
     }
     
     private func printLoadedInfoRecord(infoRecord: FileInfoRecord) {
@@ -484,14 +521,13 @@ internal class InfoLoader {
         }
         if let fileInfoRecord = infoRecord as? RegularFileInfoRecord {
             if loadSize {
-                print(" size: \(fileInfoRecord.size?.description ?? "")")
+                print(" size: \(fileInfoRecord.size?.byteWithUnitString() ?? "")")
             }
             if loadHash {
                 print(" SHA512: \(fileInfoRecord.sha512 ?? "")")
             }
         }
     }
-    
     
     private func printLoadedInfoRecord(url: URL, infoRecord: FileInfoRecord,
                                        restore: Bool, isChanged: Bool,
@@ -539,7 +575,7 @@ internal class InfoLoader {
         }
         if let fileInfoRecord = infoRecord as? RegularFileInfoRecord {
             if let changedFileSize = changedFileSize {
-                print(" size: \(fileInfoRecord.size?.description ?? "") -> \(changedFileSize)")
+                print(" size: \(fileInfoRecord.size?.byteWithUnitString() ?? "") -> \(changedFileSize.byteWithUnitString())")
             }
             if let changedFileSHA512 = changedFileSHA512 {
                 print(" SHA512: \(fileInfoRecord.sha512 ?? "") -> \(changedFileSHA512)")

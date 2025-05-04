@@ -107,6 +107,8 @@ internal class InfoSaver {
         savedDirectoryCount = 0
         let dirUrl = URL(dirPath: dirPath)
         let dirInfoRecord = try save(dirUrl: dirUrl, recursive: recursive)
+        
+        print()
         print("""
         Saved
             file: \(savedFileCount)
@@ -216,9 +218,38 @@ internal class InfoSaver {
             let fileInfoRecord = infoRecord as! RegularFileInfoRecord
             fileInfoRecord.size = resourceValues.fileSize
         }
+        if saveHash {
+            let fileInfoRecord = infoRecord as! RegularFileInfoRecord
+            
+            let sha512 = calculateFileHash(fileUrl: url, regularFileInfoRecord: fileInfoRecord)
+            fileInfoRecord.sha512 = sha512
+        }
         
         printSavedInfoRecord(url: url, infoRecord: infoRecord)
         return infoRecord
+    }
+    
+    private func calculateFileHash(fileUrl: URL, regularFileInfoRecord: RegularFileInfoRecord) -> String {
+        print("Hash \(fileUrl.relativePath(baseUrl: URL(dirPath: dirPath)))")
+        let progressPrinter = ProgressPrinter(format: "%@ (%@ / %@), %@/s")
+        var sha512 = ""
+        do {
+            sha512 = try HashComputer.computeSHA512(fileUrl: fileUrl) { hashProgress in
+                progressPrinter.update(hashProgress.percentage,
+                                       hashProgress.totalUpdatedLength.byteWithUnitString(),
+                                       hashProgress.totalLength.byteWithUnitString(),
+                                       hashProgress.lengthPerSecond)
+            }
+        } catch let error as NSError {
+            print(error.localizedDescription)
+            regularFileInfoRecord.computeHashFailed = true
+        }
+        
+        defer {
+            progressPrinter.end()
+        }
+        
+        return sha512
     }
     
     private func printSavedInfoRecord(url: URL, infoRecord: FileInfoRecord) {
@@ -241,7 +272,7 @@ internal class InfoSaver {
         }
         if let fileInfoRecord = infoRecord as? RegularFileInfoRecord {
             if let size = fileInfoRecord.size {
-                print(" size: \(size)")
+                print(" size: \(size.byteWithUnitString())")
             }
             if let sha512 = fileInfoRecord.sha512 {
                 print(" SHA512: \(sha512)")

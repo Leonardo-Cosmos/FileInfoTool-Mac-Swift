@@ -10,43 +10,48 @@ import System
 
 extension URL {
     
+    private static func standardizePath(_ path: String) -> String {
+        return path.replacingOccurrences(pattern: "(?<=/)\\./", with: "")
+            .replacingOccurrences(pattern: "(?<=/)[^/]+/\\.\\./", with: "")
+    }
+    
     init(filePathString: String) {
         if #available(macOS 13.0, *) {
-            self.init(filePath: filePathString)
+            self.init(filePath: Self.standardizePath(filePathString))
         } else {
-            self.init(fileURLWithPath: filePathString)
+            self.init(fileURLWithPath: Self.standardizePath(filePathString))
         }
     }
     
     init(fileNotDirPath: String) {
         if #available(macOS 13.0, *) {
-            self.init(filePath: fileNotDirPath, directoryHint: .notDirectory)
+            self.init(filePath: Self.standardizePath(fileNotDirPath), directoryHint: .notDirectory)
         } else {
-            self.init(fileURLWithPath: fileNotDirPath, isDirectory: false)
+            self.init(fileURLWithPath: Self.standardizePath(fileNotDirPath), isDirectory: false)
         }
     }
     
     init(dirPath: String) {
         if #available(macOS 13.0, *) {
-            self.init(filePath: dirPath, directoryHint: .isDirectory)
+            self.init(filePath: Self.standardizePath(dirPath), directoryHint: .isDirectory)
         } else {
-            self.init(fileURLWithPath: dirPath, isDirectory: true)
+            self.init(fileURLWithPath: Self.standardizePath(dirPath), isDirectory: true)
         }
     }
     
     func appending(fileNotDirPath: String) -> URL {
         if #available(macOS 13.0, *) {
-            self.appending(path: fileNotDirPath, directoryHint: .notDirectory)
+            self.appending(path: Self.standardizePath(fileNotDirPath), directoryHint: .notDirectory)
         } else {
-            self.appendingPathComponent(fileNotDirPath, isDirectory: false)
+            self.appendingPathComponent(Self.standardizePath(fileNotDirPath), isDirectory: false)
         }
     }
     
     func appending(dirPath: String) -> URL {
         if #available(macOS 13.0, *) {
-            self.appending(path: dirPath, directoryHint: .isDirectory)
+            self.appending(path: Self.standardizePath(dirPath), directoryHint: .isDirectory)
         } else {
-            self.appendingPathComponent(dirPath, isDirectory: true)
+            self.appendingPathComponent(Self.standardizePath(dirPath), isDirectory: true)
         }
     }
     
