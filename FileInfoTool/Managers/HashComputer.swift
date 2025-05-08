@@ -71,31 +71,6 @@ internal class HashComputer {
         return hashString
     }
     
-    static func computeSHA512Async(fileURL: URL, completion: @escaping (String?) -> Void) {
-        DispatchQueue.global(qos: .userInitiated).async {
-            guard let fileHandle = try? FileHandle(forReadingFrom: fileURL) else {
-                completion(nil)
-                return
-            }
-
-            var hasher = SHA512()
-            
-            while true {
-                let data = fileHandle.readData(ofLength: 8192) // Read in chunks
-                if data.isEmpty { break } // End of file
-                
-                hasher.update(data: data)
-            }
-            
-            fileHandle.closeFile()
-            let digest = hasher.finalize()
-
-            // Convert hash to string representation
-            let hashString = digest.map { String(format: "%02x", $0) }.joined()
-            completion(hashString)
-        }
-    }
-    
     internal struct HashProgress {
         let totalLength: UInt64
         let totalUpdatedLength: UInt64
