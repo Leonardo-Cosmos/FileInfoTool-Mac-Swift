@@ -1,5 +1,5 @@
 //
-//  FileInfoTool.swift
+//  InfoLauncher.swift
 //  FileInfoTool
 //
 //  Created on 2025/01/31.
