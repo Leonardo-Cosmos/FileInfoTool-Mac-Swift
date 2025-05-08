@@ -215,14 +215,14 @@ internal class InfoSaver {
             infoRecord.accessDateUtcInterval = resourceValues.contentAccessDate?.timeIntervalSinceReferenceDate
         }
         if saveSize {
-            let fileInfoRecord = infoRecord as! RegularFileInfoRecord
-            fileInfoRecord.size = resourceValues.fileSize
+            let regularFileInfoRecord = infoRecord as! RegularFileInfoRecord
+            regularFileInfoRecord.size = resourceValues.fileSize
         }
         if saveHash {
-            let fileInfoRecord = infoRecord as! RegularFileInfoRecord
+            let regularFileInfoRecord = infoRecord as! RegularFileInfoRecord
             
-            let sha512 = calculateFileHash(fileUrl: url, regularFileInfoRecord: fileInfoRecord)
-            fileInfoRecord.sha512 = sha512
+            let sha512 = calculateFileHash(fileUrl: url, regularFileInfoRecord: regularFileInfoRecord)
+            regularFileInfoRecord.sha512 = sha512
         }
         
         printSavedInfoRecord(url: url, infoRecord: infoRecord)
@@ -270,11 +270,11 @@ internal class InfoSaver {
         if let accessDate = infoRecord.accessDateUtc {
             print (" date accessed: \(accessDate)")
         }
-        if let fileInfoRecord = infoRecord as? RegularFileInfoRecord {
-            if let size = fileInfoRecord.size {
+        if let regularFileInfoRecord = infoRecord as? RegularFileInfoRecord {
+            if let size = regularFileInfoRecord.size {
                 print(" size: \(size.byteWithUnitString())")
             }
-            if let sha512 = fileInfoRecord.sha512 {
+            if let sha512 = regularFileInfoRecord.sha512 {
                 print(" SHA512: \(sha512)")
             }
         }

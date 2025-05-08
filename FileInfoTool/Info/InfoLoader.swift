@@ -203,12 +203,12 @@ internal class InfoLoader {
             }
         }
         
-        let fileInfoRecords = dirInfoRecord.files ?? []
-        for fileInfoRecord in fileInfoRecords {
+        let regularFileInfoRecords = dirInfoRecord.files ?? []
+        for regularFileInfoRecord in regularFileInfoRecords {
             // Set parent directory because it is not saved in info record file.
-            fileInfoRecord.directory = dirInfoRecord
+            regularFileInfoRecord.directory = dirInfoRecord
             
-            printLoadedInfoRecord(infoRecord: fileInfoRecord)
+            printLoadedInfoRecord(infoRecord: regularFileInfoRecord)
         }
         
         printLoadedInfoRecord(infoRecord: dirInfoRecord)
@@ -429,10 +429,10 @@ internal class InfoLoader {
         var changedFileSHA512: String? = nil
         var isFileHashChanged = false
         if !restore && loadHash {
-            let fileInfoRecord = infoRecord as! RegularFileInfoRecord
+            let regularFileInfoRecord = infoRecord as! RegularFileInfoRecord
             
-            if let loadedSHA512 = fileInfoRecord.sha512 {
-                let sha512 = calculateFileHash(fileUrl: url, regularFileInfoRecord: fileInfoRecord)
+            if let loadedSHA512 = regularFileInfoRecord.sha512 {
+                let sha512 = calculateFileHash(fileUrl: url, regularFileInfoRecord: regularFileInfoRecord)
                 
                 if loadedSHA512 != sha512 {
                     isFileHashChanged = true
@@ -519,12 +519,12 @@ internal class InfoLoader {
         if loadAccessDate {
             print(" date accessed: \(infoRecord.accessDateUtc ?? "")")
         }
-        if let fileInfoRecord = infoRecord as? RegularFileInfoRecord {
+        if let regularFileInfoRecord = infoRecord as? RegularFileInfoRecord {
             if loadSize {
-                print(" size: \(fileInfoRecord.size?.byteWithUnitString() ?? "")")
+                print(" size: \(regularFileInfoRecord.size?.byteWithUnitString() ?? "")")
             }
             if loadHash {
-                print(" SHA512: \(fileInfoRecord.sha512 ?? "")")
+                print(" SHA512: \(regularFileInfoRecord.sha512 ?? "")")
             }
         }
     }
@@ -573,12 +573,12 @@ internal class InfoLoader {
         if let changedAccessDateUtc = changedAccessDateUtc {
             print (" date accessed: \(infoRecord.accessDateUtc ?? "") -> \(changedAccessDateUtc)")
         }
-        if let fileInfoRecord = infoRecord as? RegularFileInfoRecord {
+        if let regularFileInfoRecord = infoRecord as? RegularFileInfoRecord {
             if let changedFileSize = changedFileSize {
-                print(" size: \(fileInfoRecord.size?.byteWithUnitString() ?? "") -> \(changedFileSize.byteWithUnitString())")
+                print(" size: \(regularFileInfoRecord.size?.byteWithUnitString() ?? "") -> \(changedFileSize.byteWithUnitString())")
             }
             if let changedFileSHA512 = changedFileSHA512 {
-                print(" SHA512: \(fileInfoRecord.sha512 ?? "") -> \(changedFileSHA512)")
+                print(" SHA512: \(regularFileInfoRecord.sha512 ?? "") -> \(changedFileSHA512)")
             }
         }
     }
