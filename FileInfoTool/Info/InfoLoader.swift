@@ -219,6 +219,7 @@ internal class InfoLoader {
         var fileUrls: [URL]
         do {
             fileUrls = try FileManager.default.contentsOfDirectory(at: dirUrl, includingPropertiesForKeys: nil)
+            fileUrls.sort { $0.absoluteString < $1.absoluteString }
         } catch let error as NSError {
             print(error.localizedDescription)
             dirInfoRecord.getFilesFailed = true
@@ -303,6 +304,7 @@ internal class InfoLoader {
         var fileUrls: [URL]
         do {
             fileUrls = try FileManager.default.contentsOfDirectory(at: dirUrl, includingPropertiesForKeys: nil)
+            fileUrls.sort { $0.absoluteString < $1.absoluteString }
         } catch let error as NSError {
             print(error.localizedDescription)
             fileUrls = []

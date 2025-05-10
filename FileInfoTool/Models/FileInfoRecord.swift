@@ -53,6 +53,6 @@ internal extension FileInfoRecord {
     }
     
     static func compareByName(lInfo: any FileInfoRecord, rInfo: any FileInfoRecord) -> Bool {
-        return lInfo.name > rInfo.name
+        return lInfo.name < rInfo.name
     }
 }
